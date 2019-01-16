@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import time
 from xiaohua_spider.items import XiaohuaSpiderItem
 from scrapy import Request
 
@@ -10,7 +11,7 @@ class XiaohuaSpider(scrapy.Spider):
     start_urls = ['http://www.xiaohuar.com/hua/']
 
     # 存放待爬取的url，scrapy会自动去重和重试失败链接，我们只需考虑忘url集合中添加为爬取的url
-    url_set = set()
+    # url_set = set()
 
     def parse(self, response):
         """
@@ -20,21 +21,25 @@ class XiaohuaSpider(scrapy.Spider):
         """
         # 首先重写parse，否则父类会报Not Implement
         img_list = response.xpath('//*[@class="img"]/a/@href').extract()
-        # print(1111111)
-        # print(img_list)
         for href in img_list:
-            if href in self.url_set:
-                print('链接已存在')
-                continue
-            else:
-                self.url_set.add(href)
-        for link in self.url_set:
+            # if href in self.url_set:
+            #     print('链接已存在')
+            #     continue
+            # else:
+                # self.url_set.add(href)
+        # for link in self.url_set:
+            yield Request(
+                url=href,
+                callback=self.parser_list
+            )
+
+        # 获取下一页
+        for x in range(1, 11):
+            url = f'http://www.xiaohuar.com/list-1-{x}.html'
             yield scrapy.Request(
-                    url=link,
-                    callback=self.parser_list
-                )
-            # break
-        # print(self.url_set)
+                url=url,
+                callback=self.parse
+            )
 
     def parser_list(self, response):
         """
@@ -43,7 +48,7 @@ class XiaohuaSpider(scrapy.Spider):
         :return:
         """
         # 标题
-        title = response.xpath('//div[@class="div_h1"]/h1/text()').extract()
+        title = response.xpath('//div[@class="div_h1"]/h1/text()').extract()[0]
         trs = response.xpath('//div[@class="infodiv"]/table/tbody/tr')
         # 姓名
         name = trs[0].xpath('./td[2]/text()').extract()[0]
@@ -78,25 +83,40 @@ class XiaohuaSpider(scrapy.Spider):
         else:
             prof = prof[0]
 
+        # item = XiaohuaSpiderItem()
+        # item['name'] = name
+        # item['age'] = age
+        # item['cons'] = cons
+        # item['specialty'] = specialty
+        # item['school'] = school
+        # item['prof'] = prof
+        # yield item
+
         link = response.xpath('//div[@class="post_entry"]/ul[@class="photo_ul"]/li/div/a/@href').extract()
         for href in link:
+            pass
+            # yield 相当于同步函数里的返回值，callback相当于方法嵌套调用，只不过这两个关键字表现异步处理过程。yield生成请求对象（还没有发送请求）到队列中，框架从队列里取一个对象去请求，得到相应后再交给回调函数处理。
+
             yield Request(
                 url=href,
-                callback=self.parse_detail
+                callback=self.parse_detail,
+                meta={'title': title}
             )
-        item = XiaohuaSpiderItem()
-        item['name'] = name
-        item['age'] = age
-        item['cons'] = cons
-        item['specialty'] = specialty
-        item['school'] = school
-        item['prof'] = prof
-        item['title'] = title
-        # yield item
 
     def parse_detail(self, response):
         """
         解析照片详情页
         :return:
         """
-        pass
+        img_urls = response.xpath('//div[@class="pic_img_gallery ad-thumbs"]/ul/li/div/a/@href').extract()
+        for img_url in img_urls:
+            img_name = img_url.split('/')[-1]   # 哈希加密的照片名  20180902vVvfvLzZ50.jpg
+            item = XiaohuaSpiderItem()
+            item['img_url'] = img_url
+            item['img_name'] = img_name
+            item['title'] = response.meta.get('title')
+
+            # print(item['title'])
+            # print(img_url, img_name)
+            yield item
+

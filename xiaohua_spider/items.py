@@ -17,4 +17,7 @@ class XiaohuaSpiderItem(scrapy.Item):
     specialty = scrapy.Field()
     school = scrapy.Field()
     prof = scrapy.Field()
-    title= scrapy.Field()
+    title = scrapy.Field()   # 照片文件夹名
+    img_url = scrapy.Field()
+    img_name = scrapy.Field()
+
