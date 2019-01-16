@@ -70,8 +70,8 @@ DEFAULT_REQUEST_HEADERS = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   # 'xiaohua_spider.pipelines.XiaohuaSpiderPipeline': 300,
-   'xiaohua_spider.pipelines.SaveImgPipeline': 301
+   'xiaohua_spider.pipelines.XiaohuaSpiderPipeline': 300,
+   # 'xiaohua_spider.pipelines.SaveImgPipeline': 301
 
 }
 

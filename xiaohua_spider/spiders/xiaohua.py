@@ -83,14 +83,14 @@ class XiaohuaSpider(scrapy.Spider):
         else:
             prof = prof[0]
 
-        # item = XiaohuaSpiderItem()
-        # item['name'] = name
-        # item['age'] = age
-        # item['cons'] = cons
-        # item['specialty'] = specialty
-        # item['school'] = school
-        # item['prof'] = prof
-        # yield item
+        item = XiaohuaSpiderItem()
+        item['name'] = name
+        item['age'] = age
+        item['cons'] = cons
+        item['specialty'] = specialty
+        item['school'] = school
+        item['prof'] = prof
+        yield item
 
         link = response.xpath('//div[@class="post_entry"]/ul[@class="photo_ul"]/li/div/a/@href').extract()
         for href in link:
@@ -109,14 +109,14 @@ class XiaohuaSpider(scrapy.Spider):
         :return:
         """
         img_urls = response.xpath('//div[@class="pic_img_gallery ad-thumbs"]/ul/li/div/a/@href').extract()
-        for img_url in img_urls:
-            img_name = img_url.split('/')[-1]   # 哈希加密的照片名  20180902vVvfvLzZ50.jpg
-            item = XiaohuaSpiderItem()
-            item['img_url'] = img_url
-            item['img_name'] = img_name
-            item['title'] = response.meta.get('title')
-
-            # print(item['title'])
-            # print(img_url, img_name)
-            yield item
+        # for img_url in img_urls:
+        #     img_name = img_url.split('/')[-1]   # 哈希加密的照片名  20180902vVvfvLzZ50.jpg
+        #     item = XiaohuaSpiderItem()
+        #     item['img_url'] = img_url
+        #     item['img_name'] = img_name
+        #     item['title'] = response.meta.get('title')
+        #
+        #     # print(item['title'])
+        #     # print(img_url, img_name)
+        #     yield item
 
